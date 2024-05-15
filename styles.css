@@ -1,0 +1,80 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(10, 50px);
+    grid-template-rows: repeat(10, 50px);
+    gap: 2px;
+    border: 2px solid black;
+}
+
+.game-board div {
+    width: 50px;
+    height: 50px;
+    border: 1px solid black;
+}
+
+.game-info {
+    width: 300px;
+    border: 2px solid black;
+    padding: 10px;
+}
+
+.player-stats, .game-status, .messages {
+    margin-bottom: 20px;
+}
+
+.player {
+    margin-bottom: 10px;
+}
+
+.message-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.message-list li {
+    margin-bottom: 5px;
+}
+/* Add styling for game board cells */
+.cell {
+    width: 50px;
+    height: 50px;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Add styling for selected cells (for placing monsters) */
+.selected {
+    background-color: yellow;
+}
+
+/* Add styling for player territories (edges of the grid) */
+.player1-edge {
+    background-color: blue;
+}
+
+.player2-edge {
+    background-color: red;
+}
+
+.player3-edge {
+    background-color: green;
+}
+
+.player4-edge {
+    background-color: orange;
+}
