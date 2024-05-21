@@ -1,80 +1,38 @@
 body {
     font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
     margin: 0;
-    padding: 0;
+    padding: 20px;
 }
-
 .container {
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-start;
-    margin-top: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-
-.game-board {
-    display: grid;
-    grid-template-columns: repeat(10, 50px);
-    grid-template-rows: repeat(10, 50px);
-    gap: 2px;
-    border: 2px solid black;
+h1 {
+    text-align: center;
 }
-
-.game-board div {
-    width: 50px;
-    height: 50px;
-    border: 1px solid black;
-}
-
-.game-info {
-    width: 300px;
-    border: 2px solid black;
-    padding: 10px;
-}
-
-.player-stats, .game-status, .messages {
+.rules {
     margin-bottom: 20px;
 }
-
-.player {
-    margin-bottom: 10px;
+.join-form {
+    text-align: center;
 }
-
-.message-list {
-    list-style-type: none;
-    padding: 0;
+.join-form input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    margin: 10px 0;
 }
-
-.message-list li {
-    margin-bottom: 5px;
+.join-form button {
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
 }
-/* Add styling for game board cells */
-.cell {
-    width: 50px;
-    height: 50px;
-    border: 1px solid black;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Add styling for selected cells (for placing monsters) */
-.selected {
-    background-color: yellow;
-}
-
-/* Add styling for player territories (edges of the grid) */
-.player1-edge {
-    background-color: blue;
-}
-
-.player2-edge {
-    background-color: red;
-}
-
-.player3-edge {
-    background-color: green;
-}
-
-.player4-edge {
-    background-color: orange;
+.join-form button:hover {
+    background: #218838;
 }
