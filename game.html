@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Mayhem - Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="player-panel player-left">
+            <h3 id="player1-name">Player 1</h3>
+            <div class="stats" id="player1-stats">Wins: 0, Losses: 0</div>
+            <div class="monster-count">Monsters: 12</div>
+            <div class="eliminated">Eliminated: 0</div>
+            <div class="monster-container" id="player1-monsters"></div>
+        </div>
+        <div class="player-panel player-right">
+            <h3 id="player2-name">Player 2</h3>
+            <div class="stats" id="player2-stats">Wins: 0, Losses: 0</div>
+            <div class="monster-count">Monsters: 12</div>
+            <div class="eliminated">Eliminated: 0</div>
+            <div class="monster-container" id="player2-monsters"></div>
+        </div>
+        <div class="grid">
+            <table id="game-grid">
+                <!-- Grid will be generated dynamically by JavaScript -->
+            </table>
+        </div>
+        <div class="player-panel player-top">
+            <h3 id="player3-name">Player 3</h3>
+            <div class="stats" id="player3-stats">Wins: 0, Losses: 0</div>
+            <div class="monster-count">Monsters: 12</div>
+            <div class="eliminated">Eliminated: 0</div>
+            <div class="monster-container" id="player3-monsters"></div>
+        </div>
+        <div class="player-panel player-bottom">
+            <h3 id="player4-name">Player 4</h3>
+            <div class="stats" id="player4-stats">Wins: 0, Losses: 0</div>
+            <div class="monster-count">Monsters: 12</div>
+            <div class="eliminated">Eliminated: 0</div>
+            <div class="monster-container" id="player4-monsters"></div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
