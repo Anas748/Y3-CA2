@@ -1,7 +1,6 @@
 document.getElementById('joinForm').addEventListener('submit', function(event) {
     event.preventDefault();
     const playerName = document.getElementById('playerName').value;
-
     fetch('/join', {
         method: 'POST',
         headers: {
