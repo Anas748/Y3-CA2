@@ -9,6 +9,7 @@
   "author": "anas",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "http": "^0.0.1-security"
   }
 }
