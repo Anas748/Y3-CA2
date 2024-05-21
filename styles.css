@@ -43,7 +43,6 @@
  .join-form button:hover {
      background: #218838;
  }
- /* Basic styling for the grid */
 .grid {
     display: flex;
     justify-content: center;
