@@ -18,12 +18,12 @@ app.get("/",(req,res)=>{
 app.use(bodyParser.json());
 app.post('/join', (req, res) => {
     const playerName = req.body.name;
-    console.log("hhh");
+   
     if (!playerName || playerName=="") {
         return res.json({ success: false, message: 'Name is required' });
     }
     res.json({ success: true, player: playerName });
-    console.log("hhh");
+    
 });
 
 
