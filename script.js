@@ -7,7 +7,16 @@ document.getElementById('joinForm').addEventListener('submit', function(event) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({ name: playerName })
-        
-        
+    })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                window.location.href = `/game.html`;
+            } else {
+                alert('Error joining the game.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
     });
 });
