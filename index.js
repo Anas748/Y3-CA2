@@ -9,9 +9,9 @@ const WebSocket = require('ws');
 
 const server = http.createServer(app);
 
-const wsServer = new WebSocket.Server();
+const wsServer = new WebSocket.Server( { noServer: true } );
 const MAX_PLAYERS = 4; //MAx Player in a game is 4 
-let players = []; // Array to keep track of players
+
 
 app.use(express.static(path.resolve("")));
 app.get("/",(req,res)=>{
@@ -24,21 +24,9 @@ app.post('/join', (req, res) => {
     if (!playerName || playerName=="") {
         return res.json({ success: false, message: 'Name is required' });
     }
-    // Add the player to the array
-    players.push(playerName);
     res.json({ success: true, player: playerName });
     
 });
-
-
-
-
-
-
-
-
-
-
 
 server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
