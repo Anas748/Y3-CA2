@@ -9,7 +9,7 @@ const WebSocket = require('ws');
 
 const server = http.createServer(app);
 
-const wsServer = new WebSocket.Server( { noServer: true } );
+const wsServer = new WebSocket.Server( { server } );
 const MAX_PLAYERS = 4; //MAx Player in a game is 4 
 let games = [{ id: 1, players: [] }]; // Initialize with one game
 
@@ -22,14 +22,14 @@ app.post('/join', (req, res) => {
     const playerName = req.body.name;
    
     if (!playerName) {
-        return res.json({ success: false, message: 'Name is required' });
+        return res.json({ success: false, alert: 'Name is required' });
     }
 
     // Find the last game
     let currentGame = games[games.length - 1];
 
     // Check if the current game has reached the maximum number of players
-    if (currentGame.players.length >= MAX_PLAYERS_PER_GAME) {
+    if (currentGame.players.length >= MAX_PLAYERS) {
         // Create a new game if the current game is full
         currentGame = { id: games.length + 1, players: [] };
         games.push(currentGame);
@@ -43,7 +43,8 @@ app.post('/join', (req, res) => {
         monsters: { vampire: 4, werewolf: 4, ghost: 4 }
     });
     res.json({ success: true, gameId: currentGame.id, player: playerName });
-    
+    // Broadcast to all connected clients
+    broadcastGameState(currentGame);
 });
 app.get('/games/:gameId', (req, res) => {
     const gameId = parseInt(req.params.gameId, 10);
@@ -56,6 +57,24 @@ app.get('/games/:gameId', (req, res) => {
     }
 });
 
+wsServer.on('connection', ws => {
+    console.log("New client connected");
+    ws.on('message', message => {
+        // Handle incoming messages from clients if needed
+
+    });
+
+    // Send current game state to newly connected client
+    ws.send(JSON.stringify(games[games.length - 1]));
+});
+
+function broadcastGameState(game) {
+    wsServer.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(game));
+        }
+    });
+}
 server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
