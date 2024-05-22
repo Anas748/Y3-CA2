@@ -61,7 +61,7 @@ wsServer.on('connection', ws => {
     console.log("New client connected");
     ws.on('message', message => {
         // Handle incoming messages from clients if needed
-
+        
     });
 
     // Send current game state to newly connected client
@@ -75,6 +75,7 @@ function broadcastGameState(game) {
         }
     });
 }
+
 server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
