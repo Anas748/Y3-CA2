@@ -9,18 +9,18 @@ const WebSocket = require('ws');
 
 const server = http.createServer(app);
 
-const wsServer = new WebSocket.Server( { server } );
+const wsServer = new WebSocket.Server({ server });
 const MAX_PLAYERS = 4; //MAx Player in a game is 4 
 let games = [{ id: 1, players: [] }]; // Initialize with one game
 
 app.use(express.static(path.resolve("")));
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
     return res.sendFile("index.html");
 });
 app.use(bodyParser.json());
 app.post('/join', (req, res) => {
     const playerName = req.body.name;
-   
+
     if (!playerName) {
         return res.json({ success: false, alert: 'Name is required' });
     }
@@ -36,10 +36,10 @@ app.post('/join', (req, res) => {
     }
 
     // Add the player to the current game
-    currentGame.players.push({ 
-        name: playerName, 
-        wins: 0, 
-        losses: 0, 
+    currentGame.players.push({
+        name: playerName,
+        wins: 0,
+        losses: 0,
         monsters: { vampire: 4, werewolf: 4, ghost: 4 }
     });
     res.json({ success: true, gameId: currentGame.id, player: playerName });
@@ -58,10 +58,8 @@ app.get('/games/:gameId', (req, res) => {
 });
 
 wsServer.on('connection', ws => {
-    console.log("New client connected");
     ws.on('message', message => {
         // Handle incoming messages from clients if needed
-        
     });
 
     // Send current game state to newly connected client
