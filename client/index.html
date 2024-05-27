@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monster Mayhem</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div id="game">
+        <h1>Monster Mayhem</h1>
+        <div id="name-input">
+            <input type="text" id="username" placeholder="Enter your name">
+            <button id="join-game">Join Game</button>
+        </div>
+        <div id="game-info">
+            <p>Total Games Played: <span id="total-games">0</span></p>
+            <p>Your Wins: <span id="player-wins">0</span></p>
+            <p>Your Losses: <span id="player-losses">0</span></p>
+            <p id="current-turn"></p>
+        </div>
+        <div id="instructions">
+            <p>Select a monster to place it on your edge of the grid.</p>
+            <p>Click on a monster to select it for movement.</p>
+            <p>Click on a destination cell to move the monster.</p>
+        </div>
+        <div id="game-board">
+            <!-- Game grid will be populated here -->
+        </div>
+        <div id="controls">
+            <button id="place-vampire" disabled>Place Vampire</button>
+            <button id="place-werewolf" disabled>Place Werewolf</button>
+            <button id="place-ghost" disabled>Place Ghost</button>
+            <button id="end-turn" disabled>End Turn</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/app.js"></script>
+</body>
+</html>
