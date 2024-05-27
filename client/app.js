@@ -1,3 +1,7 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const socket = io();
+
+
 const totalGamesElement = document.getElementById('total-games');
 const playerWinsElement = document.getElementById('player-wins');
 const playerLossesElement = document.getElementById('player-losses');
@@ -10,3 +14,5 @@ const usernameInput = document.getElementById('username');
 const joinGameButton = document.getElementById('join-game');
 const currentTurnElement = document.getElementById('current-turn');
 const instructionsElement = document.getElementById('instructions');
+
+});
