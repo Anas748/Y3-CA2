@@ -56,7 +56,7 @@ class Game {
         if (socket.id !== this.currentPlayerTurn || this.gameBoard[row][col]) return;
         if (this.actionCounter >= this.maxActionsPerTurn) return;
 
-        const validPlacement = this.isValidPlacement(socket.id, row, col);
+        const validPlacement = this.allowedPlacing(socket.id, row, col);
         if (validPlacement) {
             this.gameBoard[row][col] = { type, playerId: socket.id, playerName: this.players[socket.id].name };
             this.players[socket.id].monsters.push({ row, col, type });
@@ -71,7 +71,7 @@ class Game {
         if (this.actionCounter >= this.maxActionsPerTurn) return;
 
         const monster = this.gameBoard[fromRow][fromCol];
-        if (monster.playerId === socket.id && this.isValidMove(socket.id, fromRow, fromCol, toRow, toCol)) {
+        if (monster.playerId === socket.id && this.allowdMove(socket.id, fromRow, fromCol, toRow, toCol)) {
             const destinationMonster = this.gameBoard[toRow][toCol];
             this.gameBoard[fromRow][fromCol] = null;
 
@@ -102,22 +102,60 @@ class Game {
             this.players[socket.id].monsters.forEach(monster => {
                 this.gameBoard[monster.row][monster.col] = null;
             });
-    
+
             io.to(this.gameId).emit('playerDisconnected', this.players[socket.id].name);
-    
+
             // Mark player as eliminated
             this.players[socket.id].eliminated = true;
-    
+
             // Only check the game status after marking the player as eliminated
             this.checkGameStatus();
-    
+
             // Remove player from the game
             delete this.players[socket.id];
             delete this.playerStats[socket.id];
         }
-    
+
         io.to(this.gameId).emit('updateBoard', this.gameBoard);
     }
+    allowedPlacing(playerId, row, col) {
+        const playerCount = Object.keys(this.players).length;
+        const playerIndex = Object.keys(this.players).indexOf(playerId);
+
+        if (playerCount === 4) {
+            if (playerIndex === 0) return row === 0;
+            if (playerIndex === 1) return row === 9;
+            if (playerIndex === 2) return col === 9;
+            if (playerIndex === 3) return col === 0;
+        } else if (playerCount === 3) {
+            if (playerIndex === 0) return row === 0;
+            if (playerIndex === 1) return row === 9;
+            if (playerIndex === 2) return col === 9;
+        } else if (playerCount === 2) {
+            if (playerIndex === 0) return row === 0;
+            if (playerIndex === 1) return row === 9;
+        } else {
+            if (playerIndex === 0) return row === 0;
+        }
+
+        return false;
+    }
+
+    allowdMove(playerId, fromRow, fromCol, toRow, toCol) {
+        const deltaRow = Math.abs(toRow - fromRow);
+        const deltaCol = Math.abs(toCol - fromCol);
+
+        if (deltaRow === 0 || deltaCol === 0) {
+            return this.gameBoard[toRow][toCol] === null || this.gameBoard[toRow][toCol].playerId !== playerId;
+        }
+
+        if (deltaRow === deltaCol && deltaRow === 2) {
+            return this.gameBoard[toRow][toCol] === null || this.gameBoard[toRow][toCol].playerId !== playerId;
+        }
+
+        return false;
+    }
+
 
 }
 server.listen(PORT, () => {
