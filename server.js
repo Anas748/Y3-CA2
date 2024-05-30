@@ -96,6 +96,28 @@ class Game {
         if (socket.id !== this.currentPlayerTurn) return;
         this.updateTurnOrder();
     }
+    removePlayer(socket) {
+        if (this.players[socket.id]) {
+            // Remove player's monsters from the game board
+            this.players[socket.id].monsters.forEach(monster => {
+                this.gameBoard[monster.row][monster.col] = null;
+            });
+    
+            io.to(this.gameId).emit('playerDisconnected', this.players[socket.id].name);
+    
+            // Mark player as eliminated
+            this.players[socket.id].eliminated = true;
+    
+            // Only check the game status after marking the player as eliminated
+            this.checkGameStatus();
+    
+            // Remove player from the game
+            delete this.players[socket.id];
+            delete this.playerStats[socket.id];
+        }
+    
+        io.to(this.gameId).emit('updateBoard', this.gameBoard);
+    }
 
 }
 server.listen(PORT, () => {
