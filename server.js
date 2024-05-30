@@ -124,26 +124,29 @@ class Game {
         });
     }
     removePlayer(socket) {
-        if (this.players[socket.id]) {
-            // Remove player's monsters from the game board
-            this.players[socket.id].monsters.forEach(monster => {
-                this.gameBoard[monster.row][monster.col] = null;
-            });
+        lock.acquire(this.gameId, (done) => {
+            if (this.players[socket.id]) {
+                // Remove player's monsters from the game board
+                this.players[socket.id].monsters.forEach(monster => {
+                    this.gameBoard[monster.row][monster.col] = null;
+                });
 
-            io.to(this.gameId).emit('playerDisconnected', this.players[socket.id].name);
+                io.to(this.gameId).emit('playerDisconnected', this.players[socket.id].name);
 
-            // Mark player as eliminated
-            this.players[socket.id].eliminated = true;
+                // Mark player as eliminated
+                this.players[socket.id].eliminated = true;
 
-            // Only check the game status after marking the player as eliminated
-            this.checkGameStatus();
+                // Only check the game status after marking the player as eliminated
+                this.checkGameStatus();
 
-            // Remove player from the game
-            delete this.players[socket.id];
-            delete this.playerStats[socket.id];
-        }
+                // Remove player from the game
+                delete this.players[socket.id];
+                delete this.playerStats[socket.id];
+            }
 
-        io.to(this.gameId).emit('updateBoard', this.gameBoard);
+            io.to(this.gameId).emit('updateBoard', this.gameBoard);
+            done(); // Release the lock
+        });
     }
     allowedPlacing(playerId, row, col) {
         const playerCount = Object.keys(this.players).length;
