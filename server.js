@@ -258,6 +258,54 @@ class Game {
     }
 
 }
+const games = {};
+let gameIdCounter = 0;
+
+io.on('connection', (socket) => {
+    socket.on('joinGame', (playerName) => {
+        let gameId = null;
+
+        for (const id in games) {
+            if (Object.keys(games[id].players).length < games[id].maxPlayers && !games[id].gameEnded) {
+                gameId = id;
+                break;
+            }
+        }
+
+        if (!gameId) {
+            gameId = `game_${gameIdCounter++}`;
+            games[gameId] = new Game(gameId);
+        }
+
+        games[gameId].addPlayer(socket, playerName);
+
+        socket.on('getStats', () => {
+            if (games[gameId].playerStats[socket.id]) {
+                socket.emit('updateStats', {
+                    totalGames: games[gameId].totalGames,
+                    playerWins: games[gameId].playerStats[socket.id].wins,
+                    playerLosses: games[gameId].playerStats[socket.id].losses,
+                });
+            }
+        });
+
+        socket.on('placeMonster', (data) => {
+            games[gameId].placeMonster(socket, data);
+        });
+
+        socket.on('moveMonster', (data) => {
+            games[gameId].moveMonster(socket, data);
+        });
+
+        socket.on('endTurn', () => {
+            games[gameId].endTurn(socket);
+        });
+
+        socket.on('disconnect', () => {
+            games[gameId].removePlayer(socket);
+        });
+    });
+});
 
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
