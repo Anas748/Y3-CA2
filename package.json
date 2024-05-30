@@ -9,6 +9,7 @@
   "author": "anas",
   "license": "ISC",
   "dependencies": {
+    "async-lock": "^1.4.1",
     "express": "^4.19.2",
     "http": "^0.0.1-security",
     "nodemon": "^3.1.2",

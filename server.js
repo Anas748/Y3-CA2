@@ -90,7 +90,7 @@ class Game {
             return;} 
 
         const monster = this.gameBoard[fromRow][fromCol];
-        if (monster.playerId === socket.id && this.allowdMove(socket.id, fromRow, fromCol, toRow, toCol)) {
+        if (monster.playerId === socket.id && this.allowedMove(socket.id, fromRow, fromCol, toRow, toCol)) {
             const destinationMonster = this.gameBoard[toRow][toCol];
             this.gameBoard[fromRow][fromCol] = null;
 
@@ -119,7 +119,7 @@ class Game {
                 done(); // Release the lock
                 return;
             }
-            this.updateTurnOrder();
+            this.nextTurn();
             done(); // Release the lock
         });
     }
@@ -171,7 +171,7 @@ class Game {
         return false;
     }
 
-    allowdMove(playerId, fromRow, fromCol, toRow, toCol) {
+    allowedMove(playerId, fromRow, fromCol, toRow, toCol) {
         const deltaRow = Math.abs(toRow - fromRow);
         const deltaCol = Math.abs(toCol - fromCol);
 
@@ -241,7 +241,7 @@ class Game {
                 io.to(this.gameId).emit('gameOver', this.players[winnerId].name);
 
                 lock.acquire(this.gameId, (done) => {
-                    this.resetGame(winnerId);
+                    this.nextRound(winnerId);
                     done(); // Release the lock after resetGame is complete
                 });
             }
