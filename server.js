@@ -51,6 +51,19 @@ class Game {
         io.to(this.gameId).emit('highlightEdge', { playerIndex, playerCount });
         io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
     }
+    //handles the option of placing monster on grid by player 
+    placeMonster(socket, { row, col, type }) {
+        if (socket.id !== this.currentPlayerTurn || this.gameBoard[row][col]) return;
+        if (this.actionCounter >= this.maxActionsPerTurn) return;
+
+        const validPlacement = this.isValidPlacement(socket.id, row, col);
+        if (validPlacement) {
+            this.gameBoard[row][col] = { type, playerId: socket.id, playerName: this.players[socket.id].name };
+            this.players[socket.id].monsters.push({ row, col, type });
+            io.to(this.gameId).emit('updateBoard', this.gameBoard);
+            this.actionCounter++;
+        }
+    }
 
 }
 server.listen(PORT, () => {
