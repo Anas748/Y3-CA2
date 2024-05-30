@@ -76,7 +76,7 @@ class Game {
             this.gameBoard[fromRow][fromCol] = null;
 
             if (destinationMonster && destinationMonster.playerId !== socket.id) {
-                this.handleCollisions(monster, destinationMonster, toRow, toCol);
+                this.killMon(monster, destinationMonster, toRow, toCol);
             } else {
                 this.gameBoard[toRow][toCol] = monster;
                 this.players[socket.id].monsters = this.players[socket.id].monsters.map(m => {
@@ -155,7 +155,43 @@ class Game {
 
         return false;
     }
+    //logic for kill of monsters 
+    killMon(monster, otherMonster, row, col) {
+        let survivor = null;
 
+        if (monster.type === 'vampire' && otherMonster.type === 'werewolf') {
+            survivor = monster;
+        } else if (monster.type === 'werewolf' && otherMonster.type === 'ghost') {
+            survivor = monster;
+        } else if (monster.type === 'ghost' && otherMonster.type === 'vampire') {
+            survivor = monster;
+        } else if (monster.type === otherMonster.type) {
+            survivor = null;
+        } else {
+            survivor = otherMonster;
+        }
+
+        this.gameBoard[row][col] = survivor;
+
+        if (survivor) {
+            this.players[survivor.playerId].monsters = this.players[survivor.playerId].monsters.map(m => {
+                if (m.row === survivor.row && m.col === survivor.col) {
+                    return { row, col, type: survivor.type };
+                }
+                return m;
+            });
+            this.players[monster.playerId].monsters = this.players[monster.playerId].monsters.filter(m => m.row !== monster.row || m.col !== monster.col);
+            this.players[otherMonster.playerId].monsters = this.players[otherMonster.playerId].monsters.filter(m => m.row !== otherMonster.row || m.col !== otherMonster.col);
+            this.players[otherMonster.playerId].lostMonsters++;
+        } else {
+            this.players[monster.playerId].monsters = this.players[monster.playerId].monsters.filter(m => m.row !== monster.row || m.col !== monster.col);
+            this.players[otherMonster.playerId].monsters = this.players[otherMonster.playerId].monsters.filter(m => m.row !== otherMonster.row || m.col !== otherMonster.col);
+            this.players[monster.playerId].lostMonsters++;
+            this.players[otherMonster.playerId].lostMonsters++;
+        }
+
+        this.checkGameStatus();
+    }
 
 }
 server.listen(PORT, () => {
