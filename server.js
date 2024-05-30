@@ -5,7 +5,8 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 const PORT = 3000;
-
+const AsyncLock = require('async-lock');
+const lock = new AsyncLock();
 app.use(express.static('client'));
 // Defining the Game class
 class Game {
