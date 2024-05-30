@@ -65,6 +65,34 @@ class Game {
         }
     }
 
+    //handles the option of mopves monster on grid by player
+    moveMonster(socket, { fromRow, fromCol, toRow, toCol }) {
+        if (socket.id !== this.currentPlayerTurn || !this.gameBoard[fromRow][fromCol]) return;
+        if (this.actionCounter >= this.maxActionsPerTurn) return;
+
+        const monster = this.gameBoard[fromRow][fromCol];
+        if (monster.playerId === socket.id && this.isValidMove(socket.id, fromRow, fromCol, toRow, toCol)) {
+            const destinationMonster = this.gameBoard[toRow][toCol];
+            this.gameBoard[fromRow][fromCol] = null;
+
+            if (destinationMonster && destinationMonster.playerId !== socket.id) {
+                this.handleCollisions(monster, destinationMonster, toRow, toCol);
+            } else {
+                this.gameBoard[toRow][toCol] = monster;
+                this.players[socket.id].monsters = this.players[socket.id].monsters.map(m => {
+                    if (m.row === fromRow && m.col === fromCol) {
+                        return { row: toRow, col: toCol, type: m.type };
+                    }
+                    return m;
+                });
+            }
+
+            io.to(this.gameId).emit('updateBoard', this.gameBoard);
+            this.actionCounter++;
+            this.checkGameStatus();
+        }
+    }
+
 }
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
