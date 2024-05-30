@@ -157,6 +157,141 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial stats fetch
     socket.emit('getStats');
 
+    function highlightPlayerEdge(playerIndex, playerCount) {
+        clearHighlights();
+        if (playerCount === 4) {
+            if (playerIndex === 0) {
+                for (let col = 0; col < 10; col++) {
+                    document.querySelector(`.cell[data-row="0"][data-col="${col}"]`).classList.add(playerColors[playerIndex]);
+                }
+            } else if (playerIndex === 1) {
+                for (let col = 0; col < 10; col++) {
+                    document.querySelector(`.cell[data-row="9"][data-col="${col}"]`).classList.add(playerColors[playerIndex]);
+                }
+            } else if (playerIndex === 2) {
+                for (let row = 0; row < 10; row++) {
+                    document.querySelector(`.cell[data-row="${row}"][data-col="9"]`).classList.add(playerColors[playerIndex]);
+                }
+            } else if (playerIndex === 3) {
+                for (let row = 0; row < 10; row++) {
+                    document.querySelector(`.cell[data-row="${row}"][data-col="0"]`).classList.add(playerColors[playerIndex]);
+                }
+            }
+        } else if (playerCount === 3) {
+            if (playerIndex === 0) {
+                for (let col = 0; col < 10; col++) {
+                    document.querySelector(`.cell[data-row="0"][data-col="${col}"]`).classList.add(playerColors[playerIndex]);
+                }
+            } else if (playerIndex === 1) {
+                for (let row = 0; row < 10; row++) {
+                    document.querySelector(`.cell[data-row="9"][data-col="${row}"]`).classList.add(playerColors[playerIndex]);
+                }
+            } else if (playerIndex === 2) {
+                for (let row = 0; row < 10; row++) {
+                    document.querySelector(`.cell[data-row="${row}"][data-col="9"]`).classList.add(playerColors[playerIndex]);
+                }
+            }
+        } else if (playerCount === 2) {
+            if (playerIndex === 0) {
+                for (let col = 0; col < 10; col++) {
+                    document.querySelector(`.cell[data-row="0"][data-col="${col}"]`).classList.add(playerColors[playerIndex]);
+                }
+            } else if (playerIndex === 1) {
+                for (let col = 0; col < 10; col++) {
+                    document.querySelector(`.cell[data-row="9"][data-col="${col}"]`).classList.add(playerColors[playerIndex]);
+                }
+            }
+        } else {
+            for (let col = 0; col < 10; col++) {
+                document.querySelector(`.cell[data-row="0"][data-col="${col}"]`).classList.add(playerColors[playerIndex]);
+            }
+        }
+    }
+
+    function highlightValidPlacements() {
+        clearHighlights();
+        if (playerCount === 4) {
+            if (playerIndex === 0) {
+                for (let col = 0; col < 10; col++) {
+                    const cell = document.querySelector(`.cell[data-row="0"][data-col="${col}"]`);
+                    if (!cell.textContent) cell.classList.add('highlight');
+                }
+            } else if (playerIndex === 1) {
+                for (let row = 0; row < 10; row++) {
+                    const cell = document.querySelector(`.cell[data-row="${row}"][data-col="9"]`);
+                    if (!cell.textContent) cell.classList.add('highlight');
+                }
+            } else if (playerIndex === 2) {
+                for (let col = 0; col < 10; col++) {
+                    const cell = document.querySelector(`.cell[data-row="9"][data-col="${col}"]`);
+                    if (!cell.textContent) cell.classList.add('highlight');
+                }
+            } else if (playerIndex === 3) {
+                for (let row = 0; row < 10; row++) {
+                    const cell = document.querySelector(`.cell[data-row="${row}"][data-col="0"]`);
+                    if (!cell.textContent) cell.classList.add('highlight');
+                }
+            }
+        } else if (playerCount === 3) {
+            if (playerIndex === 0) {
+                for (let col = 0; col < 10; col++) {
+                    const cell = document.querySelector(`.cell[data-row="0"][data-col="${col}"]`);
+                    if (!cell.textContent) cell.classList.add('highlight');
+                }
+            } else if (playerIndex === 1) {
+                for (let row = 0; row < 10; row++) {
+                    const cell = document.querySelector(`.cell[data-row="${row}"][data-col="9"]`);
+                    if (!cell.textContent) cell.classList.add('highlight');
+                }
+            } else if (playerIndex === 2) {
+                for (let col = 0; col < 10; col++) {
+                    const cell = document.querySelector(`.cell[data-row="9"][data-col="${col}"]`);
+                    if (!cell.textContent) cell.classList.add('highlight');
+                }
+            }
+        } else if (playerCount === 2) {
+            if (playerIndex === 0) {
+                for (let col = 0; col < 10; col++) {
+                    const cell = document.querySelector(`.cell[data-row="0"][data-col="${col}"]`);
+                    if (!cell.textContent) cell.classList.add('highlight');
+                }
+            } else if (playerIndex === 1) {
+                for (let col = 0; col < 10; col++) {
+                    const cell = document.querySelector(`.cell[data-row="9"][data-col="${col}"]`);
+                    if (!cell.textContent) cell.classList.add('highlight');
+                }
+            }
+        }
+    }
+
+    function highlightValidMoves(row, col) {
+        clearHighlights();
+        const directions = [
+            { dRow: 1, dCol: 0 }, { dRow: -1, dCol: 0 }, { dRow: 0, dCol: 1 }, { dRow: 0, dCol: -1 },
+            { dRow: 1, dCol: 1 }, { dRow: 1, dCol: -1 }, { dRow: -1, dCol: 1 }, { dRow: -1, dCol: -1 }
+        ];
+
+        directions.forEach(({ dRow, dCol }) => {
+            for (let i = 1; i <= 10; i++) {
+                const newRow = row + dRow * i;
+                const newCol = col + dCol * i;
+
+                if (newRow >= 0 && newRow < 10 && newCol >= 0 && newCol < 10) {
+                    const cell = document.querySelector(`.cell[data-row="${newRow}"][data-col="${newCol}"]`);
+                    if (!cell.textContent) {
+                        cell.classList.add('highlight');
+                    } else if (cell.textContent.includes(`(${playerName})`)) {
+                        continue;
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+        });
+    }
+
     function clearHighlights() {
         document.querySelectorAll('.highlight').forEach(cell => {
             cell.classList.remove('highlight');
