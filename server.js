@@ -94,7 +94,7 @@ class Game {
     }
     endTurn(socket) {
         if (socket.id !== this.currentPlayerTurn) return;
-        this.updateTurnOrder();
+        this.nextTurn();
     }
     removePlayer(socket) {
         if (this.players[socket.id]) {
@@ -213,6 +213,20 @@ class Game {
             io.to(this.gameId).emit('gameOver', this.players[winnerId].name);
             setTimeout(() => this.resetGame(winnerId), 1000);
         }
+    }
+    nextTurn() {
+        const playerIds = Object.keys(this.players);
+        const currentIndex = playerIds.indexOf(this.currentPlayerTurn);
+        let nextIndex = (currentIndex + 1) % playerIds.length;
+    
+        // Skip eliminated players
+        while (this.players[playerIds[nextIndex]] && this.players[playerIds[nextIndex]].eliminated) {
+            nextIndex = (nextIndex + 1) % playerIds.length;
+        }
+    
+        this.currentPlayerTurn = playerIds[nextIndex];
+        this.actionCounter = 0;
+        io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
     }
 
 }
