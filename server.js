@@ -24,33 +24,37 @@ class Game {
     }
     // Adding a player to the game
     addPlayer(socket, playerName) {
-        if (Object.keys(this.players).length >= this.maxPlayers) {
-            socket.emit('full');
-            socket.disconnect();
-            return;
-        }
+        lock.acquire(this.gameId, (done) => {
+            if (Object.keys(this.players).length >= this.maxPlayers) {
+                socket.emit('full');
+                socket.disconnect();
+                done(); // Release the lock
+                return;
+            }
 
-        this.players[socket.id] = { id: socket.id, name: playerName, monsters: [], lostMonsters: 0, eliminated: false };
-        this.playerStats[socket.id] = { wins: 0, losses: 0 };
+            this.players[socket.id] = { id: socket.id, name: playerName, monsters: [], lostMonsters: 0, eliminated: false };
+            this.playerStats[socket.id] = { wins: 0, losses: 0 };
 
-        const playerIndex = Object.keys(this.players).indexOf(socket.id);
-        const playerCount = Object.keys(this.players).length;
+            const playerIndex = Object.keys(this.players).indexOf(socket.id);
+            const playerCount = Object.keys(this.players).length;
 
-        if (Object.keys(this.players).length === 1) {
-            this.currentPlayerTurn = socket.id;
-            this.actionCounter = 0;
-        }
+            if (Object.keys(this.players).length === 1) {
+                this.currentPlayerTurn = socket.id;
+                this.actionCounter = 0;
+            }
 
-        socket.join(this.gameId);
-        socket.emit('updateBoard', this.gameBoard);
-        socket.emit('updateStats', {
-            totalGames: this.totalGames,
-            playerWins: this.playerStats[socket.id].wins,
-            playerLosses: this.playerStats[socket.id].losses,
+            socket.join(this.gameId);
+            socket.emit('updateBoard', this.gameBoard);
+            socket.emit('updateStats', {
+                totalGames: this.totalGames,
+                playerWins: this.playerStats[socket.id].wins,
+                playerLosses: this.playerStats[socket.id].losses,
+            });
+
+            io.to(this.gameId).emit('highlightEdge', { playerIndex, playerCount });
+            io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
+            done(); // Release the lock
         });
-
-        io.to(this.gameId).emit('highlightEdge', { playerIndex, playerCount });
-        io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
     }
     //handles the option of placing monster on grid by player 
     placeMonster(socket, { row, col, type }) {
@@ -201,10 +205,10 @@ class Game {
                 io.to(this.gameId).emit('playerEliminated', this.players[playerId].name);
             }
         });
-    
+
         // Filter out eliminated players
         const remainingPlayers = Object.keys(this.players).filter(playerId => !this.players[playerId].eliminated);
-    
+
         // Check if there is only one player left
         if (remainingPlayers.length === 1 && !this.gameEnded) {
             const winnerId = remainingPlayers[0];
@@ -219,12 +223,12 @@ class Game {
         const playerIds = Object.keys(this.players);
         const currentIndex = playerIds.indexOf(this.currentPlayerTurn);
         let nextIndex = (currentIndex + 1) % playerIds.length;
-    
+
         // Skip eliminated players
         while (this.players[playerIds[nextIndex]] && this.players[playerIds[nextIndex]].eliminated) {
             nextIndex = (nextIndex + 1) % playerIds.length;
         }
-    
+
         this.currentPlayerTurn = playerIds[nextIndex];
         this.actionCounter = 0;
         io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
