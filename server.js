@@ -114,8 +114,14 @@ class Game {
     });
     }
     endTurn(socket) {
-        if (socket.id !== this.currentPlayerTurn) return;
-        this.nextTurn();
+        lock.acquire(this.gameId, (done) => {
+            if (socket.id !== this.currentPlayerTurn) {
+                done(); // Release the lock
+                return;
+            }
+            this.updateTurnOrder();
+            done(); // Release the lock
+        });
     }
     removePlayer(socket) {
         if (this.players[socket.id]) {
