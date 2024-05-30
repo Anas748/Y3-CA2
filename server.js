@@ -249,18 +249,21 @@ class Game {
         });
     }
     nextTurn() {
-        const playerIds = Object.keys(this.players);
-        const currentIndex = playerIds.indexOf(this.currentPlayerTurn);
-        let nextIndex = (currentIndex + 1) % playerIds.length;
+        lock.acquire(this.gameId, (done) => {
+            const playerIds = Object.keys(this.players);
+            const currentIndex = playerIds.indexOf(this.currentPlayerTurn);
+            let nextIndex = (currentIndex + 1) % playerIds.length;
 
-        // Skip eliminated players
-        while (this.players[playerIds[nextIndex]] && this.players[playerIds[nextIndex]].eliminated) {
-            nextIndex = (nextIndex + 1) % playerIds.length;
-        }
+            // Skip eliminated players
+            while (this.players[playerIds[nextIndex]] && this.players[playerIds[nextIndex]].eliminated) {
+                nextIndex = (nextIndex + 1) % playerIds.length;
+            }
 
-        this.currentPlayerTurn = playerIds[nextIndex];
-        this.actionCounter = 0;
-        io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
+            this.currentPlayerTurn = playerIds[nextIndex];
+            this.actionCounter = 0;
+            io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
+            done(); // Release the lock
+        });
     }
     nextRound(winnerId) {
         Object.keys(this.players).forEach(playerId => {
