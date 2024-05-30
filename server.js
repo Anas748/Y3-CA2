@@ -68,7 +68,7 @@ class Game {
                 return;
             }
 
-            const validPlacement = this.isValidPlacement(socket.id, row, col);
+            const validPlacement = this.allowedPlacing(socket.id, row, col);
             if (validPlacement) {
                 this.gameBoard[row][col] = { type, playerId: socket.id, playerName: this.players[socket.id].name };
                 this.players[socket.id].monsters.push({ row, col, type });
@@ -81,8 +81,13 @@ class Game {
 
     //handles the option of mopves monster on grid by player
     moveMonster(socket, { fromRow, fromCol, toRow, toCol }) {
-        if (socket.id !== this.currentPlayerTurn || !this.gameBoard[fromRow][fromCol]) return;
-        if (this.actionCounter >= this.maxActionsPerTurn) return;
+        lock.acquire(this.gameId, (done) => {
+        if (socket.id !== this.currentPlayerTurn || !this.gameBoard[fromRow][fromCol]) {
+            done();
+           return;} 
+        if (this.actionCounter >= this.maxActionsPerTurn){
+             done();
+            return;} 
 
         const monster = this.gameBoard[fromRow][fromCol];
         if (monster.playerId === socket.id && this.allowdMove(socket.id, fromRow, fromCol, toRow, toCol)) {
@@ -105,6 +110,8 @@ class Game {
             this.actionCounter++;
             this.checkGameStatus();
         }
+        done(); // Release the lock
+    });
     }
     endTurn(socket) {
         if (socket.id !== this.currentPlayerTurn) return;
