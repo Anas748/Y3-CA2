@@ -92,6 +92,10 @@ class Game {
             this.checkGameStatus();
         }
     }
+    endTurn(socket) {
+        if (socket.id !== this.currentPlayerTurn) return;
+        this.updateTurnOrder();
+    }
 
 }
 server.listen(PORT, () => {
