@@ -223,26 +223,30 @@ class Game {
         this.checkGameStatus();
     }
     checkGameStatus() {
-        // Eliminate players based on game rules
-        Object.keys(this.players).forEach(playerId => {
-            if ((this.players[playerId].lostMonsters >= 2 || this.players[playerId].monsters.length === 0) && !this.players[playerId].eliminated) {
-                this.players[playerId].eliminated = true;
-                io.to(this.gameId).emit('playerEliminated', this.players[playerId].name);
+        lock.acquire(this.gameId, (done) => {
+            Object.keys(this.players).forEach(playerId => {
+                if ((this.players[playerId].lostMonsters >= 2 || this.players[playerId].monsters.length === 0) && !this.players[playerId].eliminated) {
+                    this.players[playerId].eliminated = true;
+                    io.to(this.gameId).emit('playerEliminated', this.players[playerId].name);
+                }
+            });
+
+            const remainingPlayers = Object.keys(this.players).filter(playerId => !this.players[playerId].eliminated);
+
+            if (remainingPlayers.length === 1 && !this.gameEnded) {
+                const winnerId = remainingPlayers[0];
+                this.gameEnded = true;
+                this.playerStats[winnerId].wins++;
+                this.totalGames++;
+                io.to(this.gameId).emit('gameOver', this.players[winnerId].name);
+
+                lock.acquire(this.gameId, (done) => {
+                    this.resetGame(winnerId);
+                    done(); // Release the lock after resetGame is complete
+                });
             }
+            done(); // Release the lock
         });
-
-        // Filter out eliminated players
-        const remainingPlayers = Object.keys(this.players).filter(playerId => !this.players[playerId].eliminated);
-
-        // Check if there is only one player left
-        if (remainingPlayers.length === 1 && !this.gameEnded) {
-            const winnerId = remainingPlayers[0];
-            this.gameEnded = true;
-            this.playerStats[winnerId].wins++;
-            this.totalGames++;
-            io.to(this.gameId).emit('gameOver', this.players[winnerId].name);
-            setTimeout(() => this.nextRound(winnerId), 1000);
-        }
     }
     nextTurn() {
         const playerIds = Object.keys(this.players);
