@@ -101,7 +101,61 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
+    // Socket.IO events
+    socket.on('updateStats', (stats) => {
+        // Update the total games, player wins, and player losses
+        totalGamesElement.textContent = stats.totalGames;
+        playerWinsElement.textContent = stats.playerWins;
+        playerLossesElement.textContent = stats.playerLosses;
+    });
 
+    socket.on('updateBoard', (board) => {
+        // Clear the board
+        gameBoardElement.querySelectorAll('.cell').forEach(cell => {
+            cell.textContent = '';
+            cell.className = 'cell';
+        });
+
+        // Update the board with new positions
+        board.forEach((row, i) => {
+            row.forEach((cell, j) => {
+                if (cell) {
+                    const cellElement = document.querySelector(`.cell[data-row="${i}"][data-col="${j}"]`);
+                    cellElement.textContent = `${cell.type} (${cell.playerName})`;
+                    cellElement.classList.add(cell.type);
+                }
+            });
+        });
+    });
+
+    socket.on('turnUpdate', (playerTurn) => {
+        currentPlayerTurn = playerTurn;
+        currentTurnElement.textContent = `Current Player Turn: ${playerTurn}`;
+    });
+
+    socket.on('highlightEdge', ({ playerIndex, playerCount }) => {
+        // Highlight the edge for the current player
+        highlightPlayerEdge(playerIndex, playerCount);
+        console.log(`player index` + playerIndex + ` playercount` + playerCount)
+    });
+
+    socket.on('gameOver', (winnerName) => {
+        // Alert when the game is over and announce the winner
+        alert(`Game over! Winner: ${winnerName}`);
+    });
+
+    socket.on('full', () => {
+        // Alert if the game is full
+        alert('The game is full. Please try again later.');
+    });
+
+    socket.on('playerEliminated', (playerName) => {
+        // Alert when a player is eliminated
+        alert(`Player ${playerName} has been eliminated!`);
+    });
+
+    // Initial stats fetch
+    socket.emit('getStats');
 
     function clearHighlights() {
         document.querySelectorAll('.highlight').forEach(cell => {
