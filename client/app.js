@@ -63,7 +63,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-
-
+        function clearHighlights() { 
+            document.querySelectorAll('.highlight').forEach(cell => {
+                cell.classList.remove('highlight');
+            });
+        }
+        function updateInstructions() {
+            if (selectedMonster) {
+                instructionsElement.textContent = `Placing ${selectedMonster}. Click on a cell on your edge to place it.`;
+            } else if (selectedCell) {
+                instructionsElement.textContent = `Selected monster. Click on a cell to move it.`;
+            } else {
+                instructionsElement.textContent = `Select a monster to place or move.`;
+            }
+        }
 
 });
