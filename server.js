@@ -242,7 +242,7 @@ class Game {
 
                 lock.acquire(this.gameId, (done) => {
                     this.nextRound(winnerId);
-                    done(); // Release the lock after resetGame is complete
+                   done(); // Release the lock after resetGame is complete
                 });
             }
             done(); // Release the lock
@@ -279,7 +279,7 @@ class Game {
             this.players[playerId].eliminated = false;
         });
 
-        this.currentPlayerTurn = Object.keys(this.players)[0];
+        this.currentPlayerTurn =  winnerId;
         this.actionCounter = 0;
         this.gameEnded = false;
         io.to(this.gameId).emit('updateBoard', this.gameBoard);
