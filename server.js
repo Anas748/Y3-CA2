@@ -211,7 +211,7 @@ class Game {
             this.playerStats[winnerId].wins++;
             this.totalGames++;
             io.to(this.gameId).emit('gameOver', this.players[winnerId].name);
-            setTimeout(() => this.resetGame(winnerId), 1000);
+            setTimeout(() => this.nextRound(winnerId), 1000);
         }
     }
     nextTurn() {
@@ -228,8 +228,37 @@ class Game {
         this.actionCounter = 0;
         io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
     }
+    nextRound(winnerId) {
+        Object.keys(this.players).forEach(playerId => {
+            if (playerId !== winnerId) {
+                this.playerStats[playerId].losses++;
+            }
+        });
+
+        this.gameBoard = Array.from({ length: 10 }, () => Array(10).fill(null));
+        Object.keys(this.players).forEach(playerId => {
+            this.players[playerId].monsters = [];
+            this.players[playerId].lostMonsters = 0;
+            this.players[playerId].eliminated = false;
+        });
+
+        this.currentPlayerTurn = Object.keys(this.players)[0];
+        this.actionCounter = 0;
+        this.gameEnded = false;
+        io.to(this.gameId).emit('updateBoard', this.gameBoard);
+        io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
+
+        Object.keys(this.players).forEach(playerId => {
+            io.to(playerId).emit('updateStats', {
+                totalGames: this.totalGames,
+                playerWins: this.playerStats[playerId].wins,
+                playerLosses: this.playerStats[playerId].losses,
+            });
+        });
+    }
 
 }
+
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
