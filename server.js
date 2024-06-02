@@ -11,16 +11,16 @@ app.use(express.static('client'));
 // Defining the Game class
 class Game {
     constructor(gameId) {
-        this.gameId = gameId;
-        this.totalGames = 0;
+        this.gameId = gameId; // unique ID for the game
+        this.totalGames = 0; // Total number of games played
         this.gameBoard = Array.from({ length: 10 }, () => Array(10).fill(null));
-        this.playerStats = {};
-        this.players = {};
-        this.maxPlayers = 4;
-        this.currentPlayerTurn = null;
-        this.actionCounter = 0;
-        this.maxActionsPerTurn = 10;
-        this.gameEnded = false;
+        this.playerStats = {}; // Player statistics
+        this.players = {};   // Players in the game
+        this.maxPlayers = 4;  // Maximum number of players
+        this.currentPlayerTurn = null; // ID of the player whose turn it is
+        this.actionCounter = 0; // Counter for actions in the current turn
+        this.maxActionsPerTurn = 1; // number of moves to a player in each turn can be chnaged for testing 
+        this.gameEnded = false; // Flag to indicate if the game has ended
     }
     // Adding a player to the game
     addPlayer(socket, playerName) {
@@ -113,6 +113,7 @@ class Game {
         done(); // Release the lock
     });
     }
+    // Method to handle ending a player's turn
     endTurn(socket) {
         lock.acquire(this.gameId, (done) => {
             if (socket.id !== this.currentPlayerTurn) {
@@ -123,6 +124,7 @@ class Game {
             done(); // Release the lock
         });
     }
+    // Method to remove a player from the game
     removePlayer(socket) {
         lock.acquire(this.gameId, (done) => {
             if (this.players[socket.id]) {
@@ -148,6 +150,7 @@ class Game {
             done(); // Release the lock
         });
     }
+     // Method to check if placing a monster is allowed
     allowedPlacing(playerId, row, col) {
         const playerCount = Object.keys(this.players).length;
         const playerIndex = Object.keys(this.players).indexOf(playerId);
@@ -170,7 +173,7 @@ class Game {
 
         return false;
     }
-
+     // Method to check if moving a monster is allowed
     allowedMove(playerId, fromRow, fromCol, toRow, toCol) {
         const deltaRow = Math.abs(toRow - fromRow);
         const deltaCol = Math.abs(toCol - fromCol);
@@ -222,6 +225,7 @@ class Game {
 
         this.checkGameStatus();
     }
+     // Method to check the status of the game
     checkGameStatus() {
         lock.acquire(this.gameId, (done) => {
             Object.keys(this.players).forEach(playerId => {
@@ -248,6 +252,7 @@ class Game {
             done(); // Release the lock
         });
     }
+     // Method to handle the next player's turn
     nextTurn() {
         lock.acquire(this.gameId, (done) => {
             const playerIds = Object.keys(this.players);
@@ -265,6 +270,7 @@ class Game {
             done(); // Release the lock
         });
     }
+     // Method to handle the next round after a game ends
     nextRound(winnerId) {
         Object.keys(this.players).forEach(playerId => {
             if (playerId !== winnerId) {
@@ -295,25 +301,29 @@ class Game {
     }
 
 }
+
+
+
+// Create an object to hold all games
 const games = {};
 let gameIdCounter = 0;
 
 io.on('connection', (socket) => {
     socket.on('joinGame', (playerName) => {
         let gameId = null;
-
+        // Find an existing game with available slots
         for (const id in games) {
             if (Object.keys(games[id].players).length < games[id].maxPlayers && !games[id].gameEnded) {
                 gameId = id;
                 break;
             }
         }
-
+         // If no existing game is found, create a new one
         if (!gameId) {
             gameId = `game_${gameIdCounter++}`;
             games[gameId] = new Game(gameId);
         }
-
+         // Add the player to the game
         games[gameId].addPlayer(socket, playerName);
 
         socket.on('getStats', () => {
