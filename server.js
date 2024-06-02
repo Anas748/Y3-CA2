@@ -21,6 +21,7 @@ class Game {
         this.actionCounter = 0; // Counter for actions in the current turn
         this.maxActionsPerTurn = 1; // number of moves to a player in each turn can be chnaged for testing 
         this.gameEnded = false; // Flag to indicate if the game has ended
+        console.log(`Game created with ID: ${this.gameId}`);
     }
     // Adding a player to the game
     addPlayer(socket, playerName) {
@@ -53,6 +54,7 @@ class Game {
 
             io.to(this.gameId).emit('highlightEdge', { playerIndex, playerCount });
             io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
+            console.log(`${playerName} joined the game ${this.gameId}`);
             done(); // Release the lock
         });
     }
@@ -73,6 +75,7 @@ class Game {
                 this.gameBoard[row][col] = { type, playerId: socket.id, playerName: this.players[socket.id].name };
                 this.players[socket.id].monsters.push({ row, col, type });
                 io.to(this.gameId).emit('updateBoard', this.gameBoard);
+                console.log(`${this.players[socket.id].name} placed a monster at (${row}, ${col})`);
                 this.actionCounter++;
             }
             done(); // Release the lock
@@ -120,6 +123,7 @@ class Game {
                 done(); // Release the lock
                 return;
             }
+            console.log(`Turn ended by ${this.players[socket.id].name}`);
             this.nextTurn();
             done(); // Release the lock
         });
@@ -134,7 +138,7 @@ class Game {
                 });
 
                 io.to(this.gameId).emit('playerDisconnected', this.players[socket.id].name);
-
+                console.log(`${this.players[socket.id].name} left the game ${this.gameId}`);
                 // Mark player as eliminated
                 this.players[socket.id].eliminated = true;
 
@@ -237,13 +241,13 @@ class Game {
 
             const remainingPlayers = Object.keys(this.players).filter(playerId => !this.players[playerId].eliminated);
 
-            if (remainingPlayers.length === 1 && !this.gameEnded) {
+            if (remainingPlayers.length === 10 && !this.gameEnded) {
                 const winnerId = remainingPlayers[0];
                 this.gameEnded = true;
                 this.playerStats[winnerId].wins++;
                 this.totalGames++;
                 io.to(this.gameId).emit('gameOver', this.players[winnerId].name);
-
+                console.log(`${this.players[winnerId].name} has won the game ${this.gameId}`);
                 lock.acquire(this.gameId, (done) => {
                     this.nextRound(winnerId);
                    done(); // Release the lock after resetGame is complete
@@ -267,6 +271,7 @@ class Game {
             this.currentPlayerTurn = playerIds[nextIndex];
             this.actionCounter = 0;
             io.to(this.gameId).emit('turnUpdate', this.players[this.currentPlayerTurn].name);
+            console.log(`It's now ${this.players[this.currentPlayerTurn].name}'s turn`);
             done(); // Release the lock
         });
     }
